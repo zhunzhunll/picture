@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>图片电子书</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<style>
+			/* 通用样式 */
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				touch-action: manipulation;
+			}
+			
+			body {
+				font-family: "Microsoft YaHei", sans-serif;
+				background-color: #f5f5f5;
+				overflow: hidden;
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+			}
+			
+			/* 电子书容器 */
+			#ebook-container {
+				flex: 1;
+				position: relative;
+				width: 100%;
+				height: calc(100vh - 50px);
+				margin: 0 auto;
+				overflow: hidden;
+				background-color: #fff;
+				box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			}
+			
+			/* 页面样式 */
+			.page {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				display: none;
+				justify-content: center;
+				align-items: center;
+				background-color: white;
+			}
+			
+			.page.active {
+				display: flex;
+			}
+			
+			.page img {
+				max-width: 100%;
+				max-height: 100%;
+				object-fit: contain;
+			}
+			
+			/* 页码指示器 */
+			#page-indicator {
+				height: 50px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: #333;
+				color: white;
+				font-size: 16px;
+			}
+			
+			/* 翻页提示 */
+			.page-hint {
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 40px;
+				height: 60px;
+				background-color: rgba(0,0,0,0.3);
+				color: white;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 24px;
+				border-radius: 4px;
+				opacity: 0;
+				transition: opacity 0.3s;
+				z-index: 10;
+			}
+			
+			#prev-hint {
+				left: 10px;
+			}
+			
+			#next-hint {
+				right: 10px;
+			}
+			
+			#ebook-container:hover .page-hint {
+				opacity: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="ebook-container">
+			<!-- 翻页提示 -->
+			<div class="page-hint" id="prev-hint">←</div>
+			<div class="page-hint" id="next-hint">→</div>
+			
+			<!-- 图片页面 -->
+			<div class="page active">
+				<img src="js/0001页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0002页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0003页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0004页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0005页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0006页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0007页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0008页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0009页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0010页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0011页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0012页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0013页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0014页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0015页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0016页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0017页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0018页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0019页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0020页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0021页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0022页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0023页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0024页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0025页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0026页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0027页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0028页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0029页.jpg"/>
+			</div>
+			<div class="page">
+				<img src="js/0030页.jpg"/>
+			</div>
+		</div>
+		
+		<div id="page-indicator">
+			<span id="current-page">1</span> / <span id="total-pages">5</span>
+		</div>
+		
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const pages = document.querySelectorAll('.page');
+				const currentPageEl = document.getElementById('current-page');
+				const totalPagesEl = document.getElementById('total-pages');
+				const prevHint = document.getElementById('prev-hint');
+				const nextHint = document.getElementById('next-hint');
+				const container = document.getElementById('ebook-container');
+				
+				let currentPage = 0;
+				totalPagesEl.textContent = pages.length;
+				
+				// 更新页面显示
+				function updatePage() {
+					pages.forEach((page, index) => {
+						page.classList.toggle('active', index === currentPage);
+					});
+					currentPageEl.textContent = currentPage + 1;
+				}
+				
+				// 下一页
+				function nextPage() {
+					if (currentPage < pages.length - 1) {
+						currentPage++;
+						updatePage();
+					}
+				}
+				
+				// 上一页
+				function prevPage() {
+					if (currentPage > 0) {
+						currentPage--;
+						updatePage();
+					}
+				}
+				
+				// 点击事件
+				container.addEventListener('click', function(e) {
+					const rect = container.getBoundingClientRect();
+					const clickX = e.clientX - rect.left;
+					const width = rect.width;
+					
+					if (clickX > width / 2) {
+						nextPage(); // 点击右侧，下一页
+					} else {
+						prevPage(); // 点击左侧，上一页
+					}
+				});
+				
+				// 键盘事件
+				document.addEventListener('keydown', function(e) {
+					if (e.key === 'ArrowRight' || e.key === ' ') {
+						nextPage();
+					} else if (e.key === 'ArrowLeft') {
+						prevPage();
+					}
+				});
+				
+				// 触摸事件（移动端支持）
+				let touchStartX = 0;
+				container.addEventListener('touchstart', function(e) {
+					touchStartX = e.touches[0].clientX;
+				});
+				
+				container.addEventListener('touchend', function(e) {
+					const touchEndX = e.changedTouches[0].clientX;
+					const diff = touchStartX - touchEndX;
+					
+					if (diff > 50) { // 向左滑动
+						nextPage();
+					} else if (diff < -50) { // 向右滑动
+						prevPage();
+					}
+				});
+			});
+		</script>
+	</body>
+</html>
